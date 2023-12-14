@@ -9,43 +9,43 @@ from requests import get, post
 config							= ConfigParser()
 config.read("config.ini")
 server							= config["main"]["server"]
-user_webapi    					= config["webapi"]["username"]
-pass_webapi    					= config["webapi"]["password"]
+user_webapi    						= config["webapi"]["username"]
+pass_webapi    						= config["webapi"]["password"]
 user_dex						= config["dex"]["name"] + "@" + config["dex"]["username"]
 pass_dex						= config["dex"]["password"]
-user_counteract					= config["counteractuser"]["username"]
-pass_counteract					= config["counteractuser"]["password"]
+user_counteract						= config["counteractuser"]["username"]
+pass_counteract						= config["counteractuser"]["password"]
 
 # Global Variables
-url_webapi      				= "https://%s/api" % server
-url_switch      				= "https://%s/switch/api/v1" % server
-url_admin       				= "https://%s/adminapi" % server
+url_webapi      					= "https://%s/api" % server
+url_switch      					= "https://%s/switch/api/v1" % server
+url_admin       					= "https://%s/adminapi" % server
 url_nicore						= "https://%s/fsapi/niCore" % server
-headers_base    				= {'Content-Type': "application/x-www-form-urlencoded"}
+headers_base    					= {'Content-Type': "application/x-www-form-urlencoded"}
 headers_xml						= {'Content-Type': 'application/xml', 'Accept': 'application/xml'}
 
 # Make Header Basic - used by WebAPI functions
 def makeHeaderWebApi():
 	# Authenticate
 	_login_url					= url_webapi + "/login"
-	_login_payload				= "username=%s&password=%s" % (user_webapi, pass_webapi)
-	_response       			= post(_login_url, headers=headers_base, data=_login_payload)
+	_login_payload					= "username=%s&password=%s" % (user_webapi, pass_webapi)
+	_response       				= post(_login_url, headers=headers_base, data=_login_payload)
 	_token						= _response.content.decode("utf-8")
 	# Build Header
 	_retval						= headers_base
-	_retval["Authorization"]	= _token
+	_retval["Authorization"]			= _token
 	return _retval
 
 # Make Header oAuth2 - used by SwitchAPI and AdminAPI functions
 def makeHeaderOA2():
 	# Authenticate
 	_login_url					= "https://" + server + "/fsum/oauth2.0/token"
-	_login_payload				= "username=%s&password=%s&grant_type=password&client_id=fs-oauth-client" % (user_counteract, pass_counteract)
+	_login_payload					= "username=%s&password=%s&grant_type=password&client_id=fs-oauth-client" % (user_counteract, pass_counteract)
 	_response					= post(_login_url, headers=headers_base, data=_login_payload)
 	_token						= _response.json()["access_token"]
 	# Build Header
 	_retval						= headers_base
-	_retval["Authorization"]	= "Bearer " + _token
+	_retval["Authorization"]			= "Bearer " + _token
 	return _retval
 
 # Helper to converts a "String" to ["String"] so that a value can just be assumed as a List
@@ -75,7 +75,7 @@ def getPolicies():
 
 # Get Single Policy
 def getPolicy(_policy_name: str):
-	_all_policies				= getPolicies()
+	_all_policies					= getPolicies()
 	for _rule in _all_policies["policies"]:
 		for _rule_id in _rule["rules"]:
 			if _policy_name in _rule_id["name"]:
@@ -168,28 +168,28 @@ def getSegments():
 
 # Clear a List
 def listClearAll(list_name: str):
-	_header					= headers_xml
-	_url					= url_nicore + "/Lists"
-	_data_xml				= """<?xml version='1.0' encoding='utf-8'?><FSAPI API_VERSION="2.0" TYPE="request"><TRANSACTION TYPE="delete_all_list_values"><LISTS><LIST NAME="%s"></LIST></LISTS></TRANSACTION></FSAPI>""" % list_name
+	_header						= headers_xml
+	_url						= url_nicore + "/Lists"
+	_data_xml					= """<?xml version='1.0' encoding='utf-8'?><FSAPI API_VERSION="2.0" TYPE="request"><TRANSACTION TYPE="delete_all_list_values"><LISTS><LIST NAME="%s"></LIST></LISTS></TRANSACTION></FSAPI>""" % list_name
 	return post(_url, headers=_header, auth=(user_dex,pass_dex), data=_data_xml).status_code == 200
 	
 # Add to a List
 def listAddValue(list_name: str, value):
-	_value_list				= normalize_to_list(value)
-	_values_xml				= ""
+	_value_list					= normalize_to_list(value)
+	_values_xml					= ""
 	for _value in _value_list: 
 		_values_xml += """<VALUE>%s</VALUE>""" % _value
-	_header					= headers_xml
-	_url					= url_nicore + "/Lists"
-	_data_xml				= """<?xml version='1.0' encoding='utf-8'?><FSAPI API_VERSION="2.0" TYPE="request"><TRANSACTION TYPE="add_list_values"><LISTS><LIST NAME="%s">%s</LIST></LISTS></TRANSACTION></FSAPI>""" % (list_name,_values_xml)
+	_header						= headers_xml
+	_url						= url_nicore + "/Lists"
+	_data_xml					= """<?xml version='1.0' encoding='utf-8'?><FSAPI API_VERSION="2.0" TYPE="request"><TRANSACTION TYPE="add_list_values"><LISTS><LIST NAME="%s">%s</LIST></LISTS></TRANSACTION></FSAPI>""" % (list_name,_values_xml)
 	return post(_url, headers=_header, auth=(user_dex,pass_dex), data=_data_xml).status_code == 200
 
 def listDeleteValue(list_name: str, value):
-	_value_list				= normalize_to_list(value)
-	_values_xml				= ""
+	_value_list					= normalize_to_list(value)
+	_values_xml					= ""
 	for _value in _value_list: 
 		_values_xml += "<VALUE>%s</VALUE>" % _value
-	_header					= headers_xml
-	_url					= url_nicore + "/Lists"
-	_data_xml				= """<?xml version='1.0' encoding='utf-8'?><FSAPI API_VERSION="2.0" TYPE="request"><TRANSACTION TYPE="delete_list_values"><LISTS><LIST NAME="%s">%s</LIST></LISTS></TRANSACTION></FSAPI>""" % (list_name,_values_xml)
+	_header						= headers_xml
+	_url						= url_nicore + "/Lists"
+	_data_xml					= """<?xml version='1.0' encoding='utf-8'?><FSAPI API_VERSION="2.0" TYPE="request"><TRANSACTION TYPE="delete_list_values"><LISTS><LIST NAME="%s">%s</LIST></LISTS></TRANSACTION></FSAPI>""" % (list_name,_values_xml)
 	return post(_url, headers=_header, auth=(user_dex,pass_dex), data=_data_xml).status_code == 200
